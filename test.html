@@ -1,0 +1,8 @@
+app.get('/login', function(req, res) {
+var scopes = 'user-read-private user-read-email';
+res.redirect('https://accounts.spotify.com/authorize' +
+  '?response_type=code' +
+  '&client_id=' + f573b2772dfe417886a6f60cb5af62df +
+  (scopes ? '&scope=' + encodeURIComponent(scopes) : '') +
+  '&redirect_uri=' + encodeURIComponent(redirect_uri));
+});

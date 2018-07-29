@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>JSSample</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    
+    <img src="#" alt="img" id="img">
+  <p>
+    <img src="#" id="emoji" alt="emojiImg"> <span id="test"></span>
+  </p>
+    
+    <div id="demo"></div> 
+    
+  <div id="photoLargeButtonFadeOut"></div>
+  <label for="file" id="photoLargeButton">
+    <div id="photoButton">
+      Upload a Photo
+    </div>
+    <input type="file" id="file" name="image" accept="image/*" capture="user">
+  </label>
+  
+  
+  </body>
+<!--   <iframe src="https://open.spotify.com/embed/user/soundrop/playlist/7vuWhXjchGOBwvHbHcnbq9" width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>-->
+<!--       <iframe src=" https://open.spotify.com/embed/user/soundrop/paylist/5AiPzkrvxDguoJy9CR0OdF" width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>  -->
+  
+  
+  <div id="demo">
+    
+  </div>
+
+<script type="text/javascript">
+  function makeblob (dataURL) {
+            var BASE64_MARKER = ';base64,';
+            if (dataURL.indexOf(BASE64_MARKER) == -1) {
+                var parts = dataURL.split(',');
+                var contentType = parts[0].split(':')[1];
+                var raw = decodeURIComponent(parts[1]);
+                return new Blob([raw], { type: contentType });
+            }
+            var parts = dataURL.split(BASE64_MARKER);
+            var contentType = parts[0].split(':')[1];
+            var raw = window.atob(parts[1]);
+            var rawLength = raw.length;
+
+            var uInt8Array = new Uint8Array(rawLength);
+
+            for (var i = 0; i < rawLength; ++i) {
+                uInt8Array[i] = raw.charCodeAt(i);
+            }
+
+            return new Blob([uInt8Array], { type: contentType });
+        }
+  
+    $(function() {
+        
+        $('img').on('click', function () {
+        //$( "img" ).change(function() {
+            //console.log(new FileReader().readAsDataURL(document.querySelector('input[type=file]').files[0]));
+        });
+            
+      $( "#file" ).change(function() {
+        
+        console.log("change");
+        
+        var test;
+        const file = document.getElementById('file').files[0]; 
+        const reader  = new FileReader();
+        // it's onload event and you forgot (parameters)
+        reader.onload = function(e)  {
+            //var image = document.createElement("img");
+            // the result image data
+            //image.src = e.target.result;
+            //document.body.appendChild(image);
+          document.getElementById("img").src = e.target.result;
+          
+          // var formData = new FormData();
+          // formData.append('file', document.getElementById('file').files[0]);
+          
+          // console.log(formData);
+          
+          $.ajax({
+            // NOTE: You must use the same location in your REST call as you used to obtain your subscription keys.
+            //   For example, if you obtained your subscription keys from westus, replace "westcentralus" in the
+            //   URL below with "westus".
+            url: "https://westeurope.api.cognitive.microsoft.com/face/v1.0/detect?returnFaceId=true&returnFaceLandmarks=false&returnFaceAttributes=emotion",
+            headers: {
+              "Content-Type": "application/octet-stream",
+              "Ocp-Apim-Subscription-Key": "4f69d181e7e246a998383ff7851f6131",
+            },
+            /*beforeSend: function(xhrObj){
+                // Request headers
+                // xhrObj.setRequestHeader("Content-Type","application/json");
+                xhrObj.setRequestHeader("Content-Type","application/octet-stream");
+
+                // NOTE: Replace the "Ocp-Apim-Subscription-Key" value with a valid subscription key.
+                xhrObj.setRequestHeader(");
+            },*/
+            type: "POST",
+            //dataType: 'json',
+            // Request body
+            // "https://cdn-images-1.medium.com/max/610/1*o8avuWLJRizq04TNpmmqdQ.jpeg"
+            //data: JSON.stringify({url: e.target.result}),
+            data : makeblob(e.target.result),
+            processData: false,  // tell jQuery not to process the data
+            contentType: false,
+        })
+        .done(function(data) {
+            console.log(data);
+            
+            
+            var emotions = ["anger", "contempt", "disgust", "fear", "happiness", "neutral", "sadness", "surprise"];
+            //console.log(emotions[0]);
+            //console.log(data[0].faceAttributes.emotion.emotions[0]);
+            // for(var x = 0; x < 1; x++) {
+                var temp = [];
+                var tempV = 0;
+            
+          
+          temp.push(data[0].faceAttributes.emotion.anger);
+          temp.push(data[0].faceAttributes.emotion.contempt);
+          temp.push(data[0].faceAttributes.emotion.disgust);
+          temp.push(data[0].faceAttributes.emotion.fear);
+          temp.push(data[0].faceAttributes.emotion.happiness);
+          temp.push(data[0].faceAttributes.emotion.neutral);
+          temp.push(data[0].faceAttributes.emotion.sadness);    
+          temp.push(data[0].faceAttributes.emotion.surprise);
+          
+              for(var p = 0; p < temp.length; p++) {
+                    if(temp[p] > tempV) {
+                        tempV = temp[p];
+                    }
+                }
+              
+          
+          
+              if (tempV == data[0].faceAttributes.emotion.anger) {
+                tempV = "anger";
+              } else if (tempV == data[0].faceAttributes.emotion.contempt) {
+                tempV = "contempt";
+              } else if (tempV == data[0].faceAttributes.emotion.disgust) {
+                tempV = "disgust";
+              } else if (tempV == data[0].faceAttributes.emotion.fear) {
+                tempV = "fear";
+              } else if (tempV == data[0].faceAttributes.emotion.happiness) {
+                tempV = "happiness";
+              } else if (tempV == data[0].faceAttributes.emotion.neutral) {
+                tempV = "neutral";
+              } else if (tempV == data[0].faceAttributes.emotion.sadness) {
+                tempV = "sadness";
+              } else if (tempV == data[0].faceAttributes.emotion.surprise) {
+                tempV = "surprise";
+              }
+              
+               //for(var i = 0; i < emotions.length; i++) {
+                 //document.getElementById("demo").innerHTML += data[x].faceAttributes.emotion.emotions[i];
+                //}
+            
+          }
+          
+           
+        });
+          
+        
+         // you have to declare the file loading
+        reader.readAsDataURL(file);
+        
+        var params = {
+            "returnFaceId": "true",
+            "returnFaceLandmarks": "false",
+            "returnFaceAttributes": "emotion"
+        };
+
+        
+
+      });
+        // .fail(function() {
+        //     alert("error");
+        // });
+    });
+
+  $.ajax({
+            url: "https://westeurope.api.cognitive.microsoft.com/face/v1.0/detect?returnFaceId=true&returnFaceLandmarks=false&returnFaceAttributes=emotion",
+            headers: {
+              "Content-Type": "application/octet-stream",
+              "Ocp-Apim-Subscription-Key": "4f69d181e7e246a998383ff7851f6131",
+            },
+            /*beforeSend: function(xhrObj){
+                // Request headers
+                // xhrObj.setRequestHeader("Content-Type","application/json");
+                xhrObj.setRequestHeader("Content-Type","application/octet-stream");
+
+                // NOTE: Replace the "Ocp-Apim-Subscription-Key" value with a valid subscription key.
+                xhrObj.setRequestHeader(");
+            },*/
+            type: "POST",
+            //dataType: 'json',
+            // Request body
+            // "https://cdn-images-1.medium.com/max/610/1*o8avuWLJRizq04TNpmmqdQ.jpeg"
+            //data: JSON.stringify({url: e.target.result}),
+            data : makeblob(e.target.result),
+            processData: false,  // tell jQuery not to process the data
+            contentType: false,
+        })
+        .done(function(data) {
+            console.log(data);
+
+var token = "BQBiWdOANEiuZM6YwV7eA3BMN3wcS3QRqyq-dXw65lVHLRWYkUI-VQ_qEAHLXdNt-Oe58-yQRPbFYy6ogOeA4RR4jdHt04i8eEiTo-qYj1sDh_khmCr4rhlIffldLjgvR4F5e8s9ZKVxSQpLO0izgalZRMay4FEM9YgR8Pkf5rlAXojAGw";
+  
+  // Get list of playlists from user
+  $.ajax({
+            url: 'https://api.spotify.com/v1/me/playlists',
+            type: 'POST',
+            headers: {
+              'Authorization' : 'Bearer ' + token'
+            }, 
+         success: function(data) {
+           console.log(data);
+           listen(data);
+         }
+ });
+
+  // Create new playlist 
+  function listen(data) {
+    
+    var jsonData = {
+      "name": "Mine",
+      "public": true
+    };
+  
+    $.ajax({
+            url: 'https://api.spotify.com/v1/me/playlists',
+            type: 'POST',
+            headers: {
+              'Authorization' : 'Bearer ' + token
+            }, 
+         data: jsonData,
+         dataType: 'json',
+         contentType: 'application/json',
+         success: function(data) {
+           console.log(data);
+           answer(data);
+         }
+ });
+  }
+
+  
+// Add track to the playlist
+  function add(songId, listId) {
+ $.ajax({
+            url: 'https://api.spotify.com/v1/me//playlists/7oi0w0SLbJ4YyjrOxhZbUv/tracks?uris=spotify%3Atrack%3A4iV5W9uYEdYUVa79Axb7R',
+            type: 'POST',
+            headers: {
+              'Authorization' : 'Bearer ' + token
+            }, 
+         data: jsonData,
+         dataType: 'json',
+         contentType: 'application/json',
+         success: function(list) {
+           console.log(list);
+         }
+ });
+  }
+
+ // Loop through playlists and add appropiate songs to the new one 
+  function answer(data) {
+    console.log("hello");
+    var mine = [];
+    
+    var playlist;
+    
+    for (i = 0; i < data.length; i++){
+     playlist = data[i];
+      
+     var track;
+     for (j=0; j < playlist.length; j++) {
+       track = playlist[j];
+       
+       if (track.mode == 1){
+        if (track.loudness > 0.5 && tempV == "surprise")
+          mine.push(track);
+         else if (track.danceability > 0.5 && tempV == "happiness")
+          mine.push(track);
+         else if (tempV == "neutral")
+          mine.push(track);
+       }
+       else {
+        if (track.energy > 0.5 && temV == "anger")
+          mine.push(track);
+        else if (track.energy < 0.1 && tempV == "sadness")
+          mine.push(track);
+        else if (track.valence < 0.05 && tempV == "disgust")
+          mine.push(track);
+        else if (track.danceability < 0.1 && tempV == "fear")
+          mine.push(track);
+        else if (tempV == "contempt")
+          mine.push(track);
+       }
+     }
+  }
+  };
+  
+  for (var i=0; i<mine.length; i++)
+    add(mine[i], list);
+  }
+      
+  document.getElementById("test").innerHTML = "We Detected " + tempV;
+  document.getElementById("demo").innerHTML = '<iframe src="https://open.spotify.com/embed/user/me/playlist/ ' + list  width="100%" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>';
+              
+</script>
+  
+
+</body>
+</html>
+
