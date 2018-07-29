@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>JSSample</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    
+    <img src="#" alt="img" id="photoUpload">
+  <p>
+    <span id="test"></span>
+  </p>
+    
+    <div id="demo"></div> 
+    
+  <div id="photoLargeButtonFadeOut"></div>
+  <label for="file" id="photoLargeButton">
+    <div id="photoButton">
+      Upload a Photo
+    </div>
+    <input type="file" id="file" name="image" accept="image/*" capture="user">
+  </label>
+  
+  
+  </body>
+<!--   <iframe src="https://open.spotify.com/embed/user/soundrop/playlist/7vuWhXjchGOBwvHbHcnbq9" width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>-->
+<!--       <iframe src=" https://open.spotify.com/embed/user/soundrop/paylist/5AiPzkrvxDguoJy9CR0OdF" width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>  -->
+  
+  
+  <div id="demo">
+    
+  </div>
+
+<script type="text/javascript">
+  function makeblob (dataURL) {
+            var BASE64_MARKER = ';base64,';
+            if (dataURL.indexOf(BASE64_MARKER) == -1) {
+                var parts = dataURL.split(',');
+                var contentType = parts[0].split(':')[1];
+                var raw = decodeURIComponent(parts[1]);
+                return new Blob([raw], { type: contentType });
+            }
+            var parts = dataURL.split(BASE64_MARKER);
+            var contentType = parts[0].split(':')[1];
+            var raw = window.atob(parts[1]);
+            var rawLength = raw.length;
+
+            var uInt8Array = new Uint8Array(rawLength);
+
+            for (var i = 0; i < rawLength; ++i) {
+                uInt8Array[i] = raw.charCodeAt(i);
+            }
+
+            return new Blob([uInt8Array], { type: contentType });
+        }
+  
+    $(function() {
+        
+
+      $( "#file" ).change(function() {
+        
+        console.log("change");
+        
+        var test;
+        const file = document.getElementById('file').files[0]; 
+        const reader  = new FileReader();
+        // it's onload event and you forgot (parameters)
+        reader.onload = function(e)  {
+            //var image = document.createElement("img");
+            // the result image data
+            //image.src = e.target.result;
+            //document.body.appendChild(image);
+          document.getElementById("photoUpload").src = e.target.result;
+          
+          // var formData = new FormData();
+          // formData.append('file', document.getElementById('file').files[0]);
+          
+          // console.log(formData);
+          
+          $.ajax({
+            // NOTE: You must use the same location in your REST call as you used to obtain your subscription keys.
+            //   For example, if you obtained your subscription keys from westus, replace "westcentralus" in the
+            //   URL below with "westus".
+            url: "https://westeurope.api.cognitive.microsoft.com/face/v1.0/detect?returnFaceId=true&returnFaceLandmarks=false&returnFaceAttributes=emotion",
+            headers: {
+              "Content-Type": "application/octet-stream",
+              "Ocp-Apim-Subscription-Key": "4f69d181e7e246a998383ff7851f6131",
+            },
+            /*beforeSend: function(xhrObj){
+                // Request headers
+                // xhrObj.setRequestHeader("Content-Type","application/json");
+                xhrObj.setRequestHeader("Content-Type","application/octet-stream");
+
+                // NOTE: Replace the "Ocp-Apim-Subscription-Key" value with a valid subscription key.
+                xhrObj.setRequestHeader(");
+            },*/
+            type: "POST",
+            //dataType: 'json',
+            // Request body
+            // "https://cdn-images-1.medium.com/max/610/1*o8avuWLJRizq04TNpmmqdQ.jpeg"
+            //data: JSON.stringify({url: e.target.result}),
+            data : makeblob(e.target.result),
+            processData: false,  // tell jQuery not to process the data
+            contentType: false,
+        })
+        .done(function(data) {
+            console.log(data);
+            
+            
+            var emotions = ["anger", "contempt", "disgust", "fear", "happiness", "neutral", "sadness", "surprise"];
+            //console.log(emotions[0]);
+            //console.log(data[0].faceAttributes.emotion.emotions[0]);
+            // for(var x = 0; x < 1; x++) {
+                var temp = [];
+                var tempV = 0;
+            
+          
+          temp.push(data[0].faceAttributes.emotion.anger);
+          temp.push(data[0].faceAttributes.emotion.contempt);
+          temp.push(data[0].faceAttributes.emotion.disgust);
+          temp.push(data[0].faceAttributes.emotion.fear);
+          temp.push(data[0].faceAttributes.emotion.happiness);
+          temp.push(data[0].faceAttributes.emotion.neutral);
+          temp.push(data[0].faceAttributes.emotion.sadness);    
+          temp.push(data[0].faceAttributes.emotion.surprise);
+          
+              for(var p = 0; p < temp.length; p++) {
+                    if(temp[p] > tempV) {
+                        tempV = temp[p];
+                    }
+                }
+              
+          
+          
+              if (tempV == data[0].faceAttributes.emotion.anger) {
+                tempV = "anger";
+              } else if (tempV == data[0].faceAttributes.emotion.contempt) {
+                tempV = "contempt";
+              } else if (tempV == data[0].faceAttributes.emotion.disgust) {
+                tempV = "disgust";
+              } else if (tempV == data[0].faceAttributes.emotion.fear) {
+                tempV = "fear";
+              } else if (tempV == data[0].faceAttributes.emotion.happiness) {
+                tempV = "happiness";
+              } else if (tempV == data[0].faceAttributes.emotion.neutral) {
+                tempV = "neutral";
+              } else if (tempV == data[0].faceAttributes.emotion.sadness) {
+                tempV = "sadness";
+              } else if (tempV == data[0].faceAttributes.emotion.surprise) {
+                tempV = "surprise";
+              }
+              
+               //for(var i = 0; i < emotions.length; i++) {
+                 //document.getElementById("demo").innerHTML += data[x].faceAttributes.emotion.emotions[i];
+                //}
+                
+          switch(tempV) {
+            case "anger": document.getElementById("demo").innerHTML = '<iframe src="https://open.spotify.com/embed/user/one-media/playlist/5AiPzkrvxDguoJy9CR0OdF" width="100%" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>';
+              document.getElementById("test").innerHTML = "We Detected Anger";
+              //document.getElementById("emoji").src = "https://d3qhp42p4neron.cloudfront.net/3.1/png/512/1f621.png?Expires=1524983316&Signature=WNiDYHXFBtBbdJUMIfZtJxcGYyBTPUzlAvE9u99pZxFsAAx626WUXEMoRae586RRePDd1yYXXfMIRSjJzvugbxCEE8Hfusp7ifwJwQ6O-z9LEAgW9Jjs4gQSToJEEEgbd~HmEm45lx-C1p738cGPPkXPTw4N7X~yphrAC~NwJdEJgkPsZmr7Cjj3vC0Dq3xFPJkeQU9UANFqzQS5a5HRLlY-ap20cUlY3om0CRFHe99TYn-HGYgoNuNStdLOvRun0CvnaRUcwvl-vAFRRAYQ6wn5Tc0SVJJMq9HrGanu7J58CR4PNmS9dgXdckHp0a~jVwIxOc7gdFkiz3nQbwRz5g__&Key-Pair-Id=APKAIRGCVGOY7DOKYTJA";
+              break;
+              
+            case "contempt": document.getElementById("demo").innerHTML = '<iframe src="https://open.spotify.com/embed/user/rangog31/playlist/0kCJSnq61lO6U3025cNCSr" width="100%" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>';
+              document.getElementById("test").innerHTML = "We Detected Contempt";
+              //document.getElementById("emoji").src = "https://d3qhp42p4neron.cloudfront.net/3.1/png/512/1f644.png?Expires=1524981848&Signature=YIUhwytphc1glq6T5X9RdoyQV308WHLxKH~M~ztm0KGkN-4qXeJ76VGx~TBD0UERZFwnqD-jGDXyZChORvmtFVg~-QTCPA0g7aFVLCG5GIE8RyLlvM0lV5Y3DNql0mKBKrPhT8ks~WlDvFnZFxDd0rNxtJdEmYxtZ1RFn8VypvZ34Fyr~WGCfs~-PdgO2Oj2ORKBWWuNEjbK-zFZufVu5V9YlJ60u8sx9wd-KRnO9yXlowCveUe62~omkxNftT6oBWdnIt70jylBgsXo1~5rsnKEY-DtbFrUDU~GRmkxxR2TQwmtFUBnkJcfivycgdaUOaRxpR4BxVsUkU6fG1QQiA__&Key-Pair-Id=APKAIRGCVGOY7DOKYTJA"
+              break;
+              
+            case "disgust": document.getElementById("demo").innerHTML = '<iframe src="https://open.spotify.com/embed/user/disney_pixar_/playlist/3qgzMg4m5tvf16PzlPgGa9" width="100%" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>';
+              document.getElementById("test").innerHTML = "We Detected Disgust";
+              //document.getElementById("emoji").src = "https://d3qhp42p4neron.cloudfront.net/3.1/png/512/1f922.png?Expires=1524983318&Signature=Qt7av9eCQBoBGH5P8xWfco2nLUZhssuc9hqMj8P9q3ZT4nJGSnFX0JfCw4iGkZpnIAWtVXSEHLBODHUmPIIO9P56-JpG0biTChDrNqEIXcQzOineidlz6uWJ86v6B7HJs~NEheIz5mc8URws3yPYM~X4oMyboU7PCOlZ7Bhe~AZDK~wpdXxANERInO1L-Pk~wWBJlImPxABs6C5FsMU8QgMeuYyIpsEjpf-zmyX0SC2RIYcGcRFUqJEs86EpOfMtpOd23U0bJCowz~C-7ypXeL8e9Wp-MmKwSkMjCTsG8~TD-XmFDg5oQrjJgj9ZqZ138788S599TcI3xoNpHxSLHQ__&Key-Pair-Id=APKAIRGCVGOY7DOKYTJA";
+              break;
+              
+            case "fear": document.getElementById("demo").innerHTML = '<iframe src="https://open.spotify.com/embed/user/h1mo4y26lwsnc1eiag8g1cu3v/playlist/5H91rh0Ml7nW2DDbhwbTg1" width="100%" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>';
+              document.getElementById("test").innerHTML = "We Detected Fear";
+              //document.getElementByID("emoji").src = "https://d3qhp42p4neron.cloudfront.net/3.1/png/512/1f628.png?Expires=1524982435&Signature=TpURD7q37aVVlJhV~lsjCALOuaZaMeBnbqtwF1twt16a1KovRPNgSkujXKUvJgLMSG~3lxQ2wq8N43Enk-xhJpnmxQE3diEDvodevgBk00tXxSqFG65VKxv6Ch18BJgwhNKx6KGodOyIjrnCOor~iWziafgWtNhs1A6OB~Arvvwo-pgja56OyuG~7pmCYc5zBxPGbNFcOmk-XPnXuTOdWcsoWR8pPaid2ohN2Jo6QFkWxEGsmRUirgdJn-wOWcEU5be3aewUHz7fl6gcgQE3kCbYxGrMocWfzMXhhwKlQHRagy44rQhRHsKeFezIpgVCuJFRE6GMDcsnZ~AW6K7IOg__&Key-Pair-Id=APKAIRGCVGOY7DOKYTJA";
+              break;
+              
+            case "happiness": document.getElementById("demo").innerHTML = '<iframe src="https://open.spotify.com/embed/user/sanik007/playlist/4AnAUkQNrLKlJCInZGSXRO" width="100%" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>';
+              document.getElementById("test").innerHTML = "We Detected Happiness";
+              //document.getElementById("emoji").src = "https://d3qhp42p4neron.cloudfront.net/3.1/png/512/1f601.png?Expires=1524982357&Signature=GxgOYIeQKEnLQmcP7Db3C1HUjCoUFJkecj9ycD84CcKYS6QowwpRMp-YIk-sYzpmV1sRsKA2pw32JHVxcfN3~vtKYznxOs-zCgXKf43m4YKX4s578efV-E~zDksmRSgOPUWt-ztT7aAo4kb9RIT5GEwES1mjH2ccXicK9cv2Oeqp~MocBhJuCS9cTKWl1Fj3n2avZcLYPS5IRwd4kxQxCXopoVDKL5oi0PCkQkE-gtCUCzqjsIMosXgZqp4zz-9WOzLZIPco2QQRr3aT180HdnpszfjzGl2vBAjymXEClaAYaanhSPg~K3kOD6QUJIuRlpLAKUZfbN37KJfUjapPug__&Key-Pair-Id=APKAIRGCVGOY7DOKYTJA";
+              break;
+              
+            case "neutral": document.getElementById("demo").innerHTML = '<iframe src="https://open.spotify.com/embed/user/montanezkl/playlist/0zoDvbtRjltMyZDyNOpGqo" width="100%" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>';
+              document.getElementById("test").innerHTML = "We Detected Neutral";
+              //document.getElementById("emoji").src = "https://d3qhp42p4neron.cloudfront.net/3.1/png/512/1f610.png?Expires=1524982695&Signature=amI9RtSDqO7DIs-hEq1WIYYoaKY4c~ENDi7wkgrC8mmBQuZLkykL~2s0aG7iUGAQh9avukIIGiWoIX8gaQM~YGW9eUV1Y1wB2IEQdUGpFP29JTIqeerDdYMKJIpyPoUainuZdtfL7WBx63BMlVZ1eYJC9xuQZsjChTjsM55NoVpUN5WveKLllreXAlEvZYZzR3cw0jz-7T2rLVFF6eJfp6W~swsVKWXl4irR5h98mKlVeanwcdNokeOQufAfcFQdztOSMhdfoxLKkejp~k898sBcxt9sX7e3H~~1bO3d~3~ySRUszRXLyEsuZ9VFcKiDsszEVxux~agg0WA4f6EyOA__&Key-Pair-Id=APKAIRGCVGOY7DOKYTJA";
+              break;
+              
+            case "sadness": document.getElementById("demo").innerHTML = '<iframe src="https://open.spotify.com/embed/user/one-media/playlist/5AiPzkrvxDguoJy9CR0OdF" width="100%" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>';
+              document.getElementById("test").innerHTML = "We Detected Sadness";
+              //document.getElementById("emoji").src = "https://d3qhp42p4neron.cloudfront.net/3.1/png/512/1f622.png?Expires=1524982971&Signature=H64ORhWJIoh0WrNmLey5ZUon8il3PO98tsJTEJEHrJGAAJ7BumNEc3OOuGD7Y6gLaGygNIDMSWwXIqu4Fuq35NTt-5uYIzt0BJl9RyQ5I00eIXj9wE5wchIoIcYqipb-FlK8TjOc-uUNQaxbnQ2MjPB5VM5AGqzthZ8f3SKY9DL~at1AdMZyfufZqNcfonTpVWPjcDZcthRN99Zl0m06NLVXXqGrGcNCERmwpHj-kXSpHb3pP55P~GxgPtby~ckyJayAAfCfMU57OJPhVgpzlkXBMp3Cc3NmRP0cepy90MmI5GPlL-HWB2xAV9n7FI8sLL42rFEEh0iDzba2LBeJkg__&Key-Pair-Id=APKAIRGCVGOY7DOKYTJA";
+              break;
+              
+            case "surprise": document.getElementById("demo").innerHTML = '<iframe src="https://open.spotify.com/embed/user/spotify/playlist/37i9dQZF1DX7qK8ma5wgG1" width="100%" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>';
+              document.getElementById("test").innerHTML = "We Detected Suprise";
+              //document.getElementById("emoji").src = "https://d3qhp42p4neron.cloudfront.net/3.1/png/512/1f632.png?Expires=1524982572&Signature=JuCM3kDbCQNwcuo7RILiv1ttuueZncR0Z03B9cTD404o5omPkvk~aIEfXAFpYej0x7a9LNitSoIF1tR89iT~t7cIIMLU6OeiezNd0ID8-acWPHLYEexv6Q03qtOXebyseH-MygFkijqbcDDQaG9qjADGJn9tLb0g2AAhwk2efT7expmRtiVSOTo~cZh33NXMBmIDcXtXQ2UUjizGGrcmUD8UWIkH8Y15wIzHGWGQv4Q4mPF2IvgPvR2~YnA2hPCXq9FDarBKNNJ65wMw0uaoVE-HympIRMhm06ziBmAmNsMuKx63BHZ7IJwzGeQlgcFv-4JXCMw3IuEPhO43lI39Eg__&Key-Pair-Id=APKAIRGCVGOY7DOKYTJA";
+              break;
+        
+            default: document.getElementById("demo").innerHTML = '<iframe src="https://open.spotify.com/embed/user/one-media/playlist/5AiPzkrvxDguoJy9CR0OdF" width="100%" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>';
+
+          }
+           
+        });
+          
+        }
+         // you have to declare the file loading
+        reader.readAsDataURL(file);
+        
+        var params = {
+            "returnFaceId": "true",
+            "returnFaceLandmarks": "false",
+            "returnFaceAttributes": "emotion"
+        };
+
+        
+
+      });
+        // .fail(function() {
+        //     alert("error");
+        // });
+    });
+
+  
+//  $.get( "https://api.spotify.com/v1/me/playlists", function( data ) {
+//   $( "body" )
+//     .append( "Name: " + data.name ) 
+//     .append( "Tracks: " + data.tracks );
+// }, "json" );
+  
+//   $.get( "https://api.spotify.com/v1/users/me/playlists/data.name[i]/tracks
+// ", function( data ) {
+//   $( "body" )
+//     .append( "Name: " + data.name ) 
+//     .append( "Tracks: " + data.tracks );
+// }, "json" );
+  
+  
+  
+  
+  
+</script>
+  
+
+</body>
+</html>
+

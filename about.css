@@ -1,0 +1,27 @@
+body {
+  padding: 0;
+  margin: 0;
+  border: 0;
+  
+  background: #212F40;
+}
+
+h2 {
+  font-family: 'Rubik', sans-serif;
+  font-size: 6vw;
+  color: #BBBEC0;
+  text-align: center;
+  
+  margin-top: 5vh;
+}
+p {
+  font-size: 4vw;
+  color: #BBBEC0;
+  
+  width: 90%;
+  margin: 0 auto;
+}
+
+img {
+  width: 100%;
+}
